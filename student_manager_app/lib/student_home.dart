@@ -14,7 +14,17 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      navigatorKey: navigatorKey, 
+      navigatorKey: navigatorKey,
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2196F3)),
+        useMaterial3: false, 
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF2196F3),
+          foregroundColor: Colors.white,
+          elevation: 4,
+        ),
+      ),
       home: const StudentHome(),
     );
   }
@@ -31,6 +41,9 @@ class _StudentHomeState extends State<StudentHome> {
   late Future<List<Student>> studentFuture;
 
   final List<String> courses = [
+    'Computer Science',
+    'Mathematics',
+    'Physics',
     'Engineering Technology',
     'Bio System Technology',
     'Information and Communication Technology',
@@ -66,7 +79,12 @@ class _StudentHomeState extends State<StudentHome> {
     final age = int.tryParse(ageController.text) ?? 0;
     final course = selectedCourse ?? '';
 
-    if (name.isEmpty || age <= 0 || course.isEmpty) return;
+    if (name.isEmpty || age <= 0 || course.isEmpty) {
+      ScaffoldMessenger.of(_safeContext).showSnackBar(
+        const SnackBar(content: Text('Please fill in all fields correctly.')),
+      );
+      return;
+    }
 
     await insertStudent(Student(name: name, age: age, course: course));
     if (!mounted) return;
@@ -86,7 +104,12 @@ class _StudentHomeState extends State<StudentHome> {
     final age = int.tryParse(ageController.text) ?? 0;
     final course = selectedCourse ?? '';
 
-    if (name.isEmpty || age <= 0 || course.isEmpty) return;
+    if (name.isEmpty || age <= 0 || course.isEmpty) {
+      ScaffoldMessenger.of(_safeContext).showSnackBar(
+        const SnackBar(content: Text('Please fill in all fields correctly.')),
+      );
+      return;
+    }
 
     await updateStudent(Student(id: id, name: name, age: age, course: course));
     if (!mounted) return;
@@ -110,7 +133,7 @@ class _StudentHomeState extends State<StudentHome> {
 
   void confirmDelete(int id) {
     showDialog(
-      context: _safeContext, 
+      context: _safeContext,
       builder: (_) => AlertDialog(
         title: const Text('Confirm Delete'),
         content: const Text('Are you sure you want to delete this student?'),
@@ -120,11 +143,17 @@ class _StudentHomeState extends State<StudentHome> {
               Navigator.pop(_safeContext);
               handleDelete(id);
             },
-            child: const Text('Yes'),
+            child: const Text(
+              'YES',
+              style: TextStyle(color: Color(0xFF2196F3)),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(_safeContext),
-            child: const Text('No'),
+            child: const Text(
+              'NO',
+              style: TextStyle(color: Color(0xFF2196F3)),
+            ),
           ),
         ],
       ),
@@ -147,7 +176,25 @@ class _StudentHomeState extends State<StudentHome> {
       builder: (dialogContext) => StatefulBuilder(
         builder: (dialogContext, setStateDialog) {
           return AlertDialog(
-            title: Text(student != null ? 'Edit Student' : 'Add Student'),
+            titlePadding: EdgeInsets.zero,
+            title: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              decoration: const BoxDecoration(
+                color: Color(0xFF2196F3),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(4),
+                  topRight: Radius.circular(4),
+                ),
+              ),
+              child: Text(
+                student != null ? 'Edit Student' : 'Add Student',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -155,25 +202,38 @@ class _StudentHomeState extends State<StudentHome> {
                   controller: nameController,
                   decoration: const InputDecoration(
                     labelText: 'Name',
-                    border: OutlineInputBorder(),
+                    border: UnderlineInputBorder(),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFF2196F3)),
+                    ),
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 12),
                 TextField(
                   controller: ageController,
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
                     labelText: 'Age',
-                    border: OutlineInputBorder(),
+                    border: UnderlineInputBorder(),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFF2196F3)),
+                    ),
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
                   value: selectedCourse,
+                  decoration: const InputDecoration(
+                    labelText: 'Course',
+                    border: UnderlineInputBorder(),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFF2196F3)),
+                    ),
+                  ),
                   items: courses.map((course) {
                     return DropdownMenuItem<String>(
                       value: course,
-                      child: Text(course),
+                      child: Text(course, overflow: TextOverflow.ellipsis),
                     );
                   }).toList(),
                   onChanged: (value) {
@@ -181,19 +241,18 @@ class _StudentHomeState extends State<StudentHome> {
                       selectedCourse = value;
                     });
                   },
-                  decoration: const InputDecoration(
-                    labelText: 'Course',
-                    border: OutlineInputBorder(),
-                  ),
                 ),
               ],
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(dialogContext),
-                child: const Text('Cancel'),
+                child: const Text(
+                  'CANCEL',
+                  style: TextStyle(color: Color(0xFF2196F3)),
+                ),
               ),
-              ElevatedButton(
+              TextButton(
                 onPressed: () {
                   Navigator.pop(dialogContext);
                   if (student != null) {
@@ -202,7 +261,10 @@ class _StudentHomeState extends State<StudentHome> {
                     handleSave();
                   }
                 },
-                child: const Text('Save'),
+                child: const Text(
+                  'SAVE',
+                  style: TextStyle(color: Color(0xFF2196F3)),
+                ),
               ),
             ],
           );
@@ -214,7 +276,12 @@ class _StudentHomeState extends State<StudentHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Student Manager App')),
+      appBar: AppBar(
+        title: const Text(
+          'Student Manager',
+          style: TextStyle(fontWeight: FontWeight.w500),
+        ),
+      ),
       body: FutureBuilder<List<Student>>(
         future: studentFuture,
         builder: (context, snapshot) {
@@ -223,20 +290,47 @@ class _StudentHomeState extends State<StudentHome> {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No students found!'));
+            return const Center(
+              child: Text(
+                'No students found.\nTap + to add one.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey, fontSize: 16),
+              ),
+            );
           }
 
           final students = snapshot.data!;
-          return ListView.builder(
+          return ListView.separated(
             itemCount: students.length,
+            separatorBuilder: (_, __) => const Divider(height: 1),
             itemBuilder: (context, index) {
               final student = students[index];
               return ListTile(
-                leading: const Icon(Icons.person),
-                title: Text(student.name),
-                subtitle: Text('${student.age}, ${student.course}'),
-                onTap: () => showStudentDialog(student),      
-                onLongPress: () => confirmDelete(student.id!), 
+                title: Text(
+                  student.name,
+                  style: const TextStyle(fontWeight: FontWeight.w500),
+                ),
+                subtitle: Text(
+                  '${student.age}, ${student.course}',
+                  style: const TextStyle(color: Colors.black54),
+                ),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit_outlined,
+                          color: Colors.blueGrey),
+                      tooltip: 'Edit',
+                      onPressed: () => showStudentDialog(student),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline,
+                          color: Colors.redAccent),
+                      tooltip: 'Delete',
+                      onPressed: () => confirmDelete(student.id!),
+                    ),
+                  ],
+                ),
               );
             },
           );
@@ -244,7 +338,8 @@ class _StudentHomeState extends State<StudentHome> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => showStudentDialog(null),
-        child: const Icon(Icons.add),
+        backgroundColor: const Color(0xFF2196F3),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
